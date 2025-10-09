@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecureInsure - Insurance Assistant</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f9ff 0%, #e8f0ff 100%);
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .chat-container {
+            width: 100%;
+            max-width: 1000px;
+            height: 85vh;
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border: 1px solid #e6edff;
+        }
+
+        .chat-header {
+            background: linear-gradient(to right, #1a3a8f, #2a56c6);
+            color: white;
+            padding: 25px 30px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chat-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 200px;
+            height: 200px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+        }
+
+        .logo {
+            width: 60px;
+            height: 60px;
+            background: white;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            color: #1a3a8f;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            z-index: 1;
+        }
+
+        .header-text h1 {
+            font-size: 26px;
+            margin-bottom: 5px;
+            font-weight: 700;
+        }
+
+        .header-text p {
+            font-size: 15px;
+            opacity: 0.9;
+        }
+
+        .status-indicator {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            z-index: 1;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            background: #4ade80;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .chat-body {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: #f8fafd;
+            border-right: 1px solid #e6edff;
+            padding: 25px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .sidebar-section h3 {
+            font-size: 16px;
+            color: #1a3a8f;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .insurance-types {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .insurance-type {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 15px;
+            background: white;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid #e6edff;
+        }
+
+        .insurance-type:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            border-color: #2a56c6;
+        }
+
+        .insurance-type i {
+            font-size: 20px;
+            color: #2a56c6;
+            width: 24px;
+        }
+
+        .insurance-type span {
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        .stats {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e6edff;
+        }
+
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+
+        .stat-value {
+            font-weight: 700;
+            color: #1a3a8f;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 25px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            background: #fcfdff;
+        }
+
+        .message {
+            max-width: 75%;
+            padding: 18px 22px;
+            border-radius: 18px;
+            line-height: 1.5;
+            position: relative;
+            animation: fadeIn 0.4s ease-out;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.04);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .bot-message {
+            background: white;
+            border-top-left-radius: 5px;
+            align-self: flex-start;
+            border-left: 4px solid #2a56c6;
+        }
+
+        .user-message {
+            background: linear-gradient(to right, #2a56c6, #3a6ae0);
+            color: white;
+            border-top-right-radius: 5px;
+            align-self: flex-end;
+        }
+
+        .message-time {
+            font-size: 12px;
+            opacity: 0.7;
+            margin-top: 8px;
+            text-align: right;
+        }
+
+        .quick-replies {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .quick-reply {
+            background: #e9efff;
+            border: 1px solid #c5d4ff;
+            border-radius: 20px;
+            padding: 10px 18px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .quick-reply:hover {
+            background: #d5e1ff;
+            transform: translateY(-2px);
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .chat-input-container {
+            padding: 20px 25px;
+            background: white;
+            border-top: 1px solid #eaeaea;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 16px 22px;
+            border: 1px solid #ddd;
+            border-radius: 30px;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s;
+            background: #f8fafd;
+        }
+
+        .chat-input:focus {
+            border-color: #2a56c6;
+            box-shadow: 0 0 0 3px rgba(42, 86, 198, 0.1);
+            background: white;
+        }
+
+        .send-button {
+            background: linear-gradient(to right, #2a56c6, #3a6ae0);
+            color: white;
+            border: none;
+            width: 54px;
+            height: 54px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 18px;
+            box-shadow: 0 5px 15px rgba(42, 86, 198, 0.3);
+        }
+
+        .send-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 7px 20px rgba(42, 86, 198, 0.4);
+        }
+
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 15px 20px;
+            background: white;
+            border-radius: 18px;
+            border-top-left-radius: 5px;
+            align-self: flex-start;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.04);
+            border-left: 4px solid #2a56c6;
+            width: fit-content;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: #2a56c6;
+            border-radius: 50%;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes typing {
+            0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+
+        .suggestion-cards {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+        }
+
+        .suggestion-card {
+            min-width: 200px;
+            background: white;
+            border-radius: 12px;
+            padding: 18px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e6edff;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .suggestion-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .suggestion-card i {
+            font-size: 24px;
+            color: #2a56c6;
+            margin-bottom: 12px;
+        }
+
+        .suggestion-card h4 {
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+
+        .suggestion-card p {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.4;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .chat-body {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                padding: 20px;
+                border-right: none;
+                border-bottom: 1px solid #e6edff;
+            }
+
+            .insurance-types {
+                flex-direction: row;
+                overflow-x: auto;
+                padding-bottom: 10px;
+            }
+
+            .insurance-type {
+                min-width: 150px;
+            }
+
+            .message {
+                max-width: 85%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <div class="logo">
+                <i class="fas fa-shield-alt"></i>
+            </div>
+            <div class="header-text">
+                <h1>SecureInsure Assistant</h1>
+                <p>Your personal insurance advisor</p>
+            </div>
+            <div class="status-indicator">
+                <div class="status-dot"></div>
+                <span>Online</span>
+            </div>
+        </div>
+
+        <div class="chat-body">
+            <div class="sidebar">
+                <div class="sidebar-section">
+                    <h3><i class="fas fa-list"></i> Insurance Types</h3>
+                    <div class="insurance-types">
+                        <div class="insurance-type" onclick="selectInsuranceType(this)">
+                            <i class="fas fa-heartbeat"></i>
+                            <span>Health Insurance</span>
+                        </div>
+                        <div class="insurance-type" onclick="selectInsuranceType(this)">
+                            <i class="fas fa-car"></i>
+                            <span>Auto Insurance</span>
+                        </div>
+                        <div class="insurance-type" onclick="selectInsuranceType(this)">
+                            <i class="fas fa-home"></i>
+                            <span>Home Insurance</span>
+                        </div>
+                        <div class="insurance-type" onclick="selectInsuranceType(this)">
+                            <i class="fas fa-life-ring"></i>
+                            <span>Life Insurance</span>
+                        </div>
+                        <div class="insurance-type" onclick="selectInsuranceType(this)">
+                            <i class="fas fa-umbrella"></i>
+                            <span>Travel Insurance</span>
+                        </div>
+                        <div class="insurance-type" onclick="selectInsuranceType(this)">
+                            <i class="fas fa-briefcase-medical"></i>
+                            <span>Business Insurance</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3><i class="fas fa-chart-bar"></i> Quick Stats</h3>
+                    <div class="stats">
+                        <div class="stat-item">
+                            <span>Policies Sold Today</span>
+                            <span class="stat-value">24</span>
+                        </div>
+                        <div class="stat-item">
+                            <span>Claims Processed</span>
+                            <span class="stat-value">18</span>
+                        </div>
+                        <div class="stat-item">
+                            <span>Customer Satisfaction</span>
+                            <span class="stat-value">96%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chat-messages" id="chatMessages">
+                <div class="message bot-message">
+                    <p>Hello! Welcome to SecureInsure. I'm your virtual insurance assistant. How can I help you with your insurance needs today?</p>
+                    <div class="message-time">10:00 AM</div>
+                    <div class="quick-replies">
+                        <div class="quick-reply" onclick="selectQuickReply(this)">Get a quote</div>
+                        <div class="quick-reply" onclick="selectQuickReply(this)">Policy information</div>
+                        <div class="quick-reply" onclick="selectQuickReply(this)">Claims assistance</div>
+                        <div class="quick-reply" onclick="selectQuickReply(this)">Coverage options</div>
+                    </div>
+
+                    <div class="suggestion-cards">
+                        <div class="suggestion-card" onclick="selectSuggestion(this)">
+                            <i class="fas fa-calculator"></i>
+                            <h4>Premium Calculator</h4>
+                            <p>Estimate your insurance premium based on your needs</p>
+                        </div>
+                        <div class="suggestion-card" onclick="selectSuggestion(this)">
+                            <i class="fas fa-file-contract"></i>
+                            <h4>Policy Documents</h4>
+                            <p>Access and manage your policy documents</p>
+                        </div>
+                        <div class="suggestion-card" onclick="selectSuggestion(this)">
+                            <i class="fas fa-headset"></i>
+                            <h4>24/7 Support</h4>
+                            <p>Connect with our customer support team</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="message user-message">
+                    <p>Hi, I'm looking for health insurance options for my family.</p>
+                    <div class="message-time">10:02 AM</div>
+                </div>
+
+                <div class="message bot-message">
+                    <p>Great! I can help you with health insurance options. We have family plans that cover spouses and children with comprehensive medical coverage. Could you tell me how many family members you'd like to cover and their ages?</p>
+                    <div class="message-time">10:02 AM</div>
+                    <div class="quick-replies">
+                        <div class="quick-reply" onclick="selectQuickReply(this)">2 adults, 2 children</div>
+                        <div class="quick-reply" onclick="selectQuickReply(this)">Only for myself</div>
+                        <div class="quick-reply" onclick="selectQuickReply(this)">For my parents</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="chat-input-container">
+            <input type="text" class="chat-input" id="userInput" placeholder="Type your message here..." onkeypress="handleKeyPress(event)">
+            <button class="send-button" onclick="sendMessage()">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const chatMessages = document.getElementById('chatMessages');
+        const userInput = document.getElementById('userInput');
+
+        function sendMessage() {
+            const message = userInput.value.trim();
+            if (message === '') return;
+
+            // Add user message
+            addMessage(message, 'user');
+            userInput.value = '';
+
+            // Show typing indicator
+            showTypingIndicator();
+
+            // Simulate bot response after a delay (using backend)
+            setTimeout(() => {
+                removeTypingIndicator();
+                // Use backend API instead of local function
+                fetch(`/api/query/?text=${encodeURIComponent(message)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.text) {
+                            addMessage(data.text, 'bot');
+                        } else {
+                            addMessage('Sorry, I couldn\'t process your request.', 'bot');
+                        }
+                        // Scroll to bottom
+                        chatMessages.scrollTop = chatMessages.scrollHeight;
+                    })
+                    .catch(err => {
+                        addMessage('Connection error. Please try again.', 'bot');
+                        chatMessages.scrollTop = chatMessages.scrollHeight;
+                    });
+            }, 1500);
+        }
+
+        function addMessage(text, sender) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}-message`;
+
+            const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+
+            messageDiv.innerHTML = `
+                <p>${text}</p>
+                <div class="message-time">${time}</div>
+            `;
+
+            // Add quick replies for bot messages
+            if (sender === 'bot') {
+                const quickReplies = getQuickReplies(text);
+                if (quickReplies) {
+                    const quickRepliesDiv = document.createElement('div');
+                    quickRepliesDiv.className = 'quick-replies';
+                    quickRepliesDiv.innerHTML = quickReplies;
+                    messageDiv.appendChild(quickRepliesDiv);
+                }
+
+                // Add suggestion cards for certain responses
+                const suggestionCards = getSuggestionCards(text);
+                if (suggestionCards) {
+                    const cardsDiv = document.createElement('div');
+                    cardsDiv.className = 'suggestion-cards';
+                    cardsDiv.innerHTML = suggestionCards;
+                    messageDiv.appendChild(cardsDiv);
+                }
+            }
+
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function showTypingIndicator() {
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'typing-indicator';
+            typingDiv.id = 'typingIndicator';
+            typingDiv.innerHTML = `
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+            `;
+            chatMessages.appendChild(typingDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function removeTypingIndicator() {
+            const typingIndicator = document.getElementById('typingIndicator');
+            if (typingIndicator) {
+                typingIndicator.remove();
+            }
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        function selectQuickReply(element) {
+            const text = element.textContent;
+            userInput.value = text;
+            sendMessage();
+        }
+
+        function selectInsuranceType(element) {
+            const type = element.querySelector('span').textContent;
+            userInput.value = `I'm interested in ${type}`;
+            sendMessage();
+        }
+
+        function selectSuggestion(element) {
+            const title = element.querySelector('h4').textContent;
+            userInput.value = `Tell me more about ${title}`;
+            sendMessage();
+        }
+
+        function generateBotResponse(userMessage) {
+            const lowerMessage = userMessage.toLowerCase();
+
+            if (lowerMessage.includes('quote') || lowerMessage.includes('price')) {
+                return "I'd be happy to help you get a quote. To provide you with an accurate estimate, I'll need some information about what you'd like to insure. Could you tell me more details?";
+            } else if (lowerMessage.includes('policy') || lowerMessage.includes('coverage')) {
+                return "Our policies offer comprehensive coverage options tailored to your needs. We have plans for health, auto, home, and life insurance. Which type are you interested in?";
+            } else if (lowerMessage.includes('claim')) {
+                return "I can assist you with the claims process. To get started, I'll need your policy number and some details about the incident. Would you like to proceed?";
+            } else if (lowerMessage.includes('health') || lowerMessage.includes('medical')) {
+                return "For health insurance, we offer individual, family, and senior plans with various coverage levels. Our plans include doctor visits, hospital stays, and prescription coverage. Would you like to compare plans?";
+            } else if (lowerMessage.includes('auto') || lowerMessage.includes('car')) {
+                return "Our auto insurance policies provide liability, collision, and comprehensive coverage. We offer competitive rates and discounts for safe drivers. Can I get some details about your vehicle?";
+            } else if (lowerMessage.includes('home') || lowerMessage.includes('house')) {
+                return "Home insurance protects your property and belongings from damage or theft. Our policies can be customized based on your home's value and location. Would you like to learn more about coverage options?";
+            } else if (lowerMessage.includes('life') || lowerMessage.includes('family')) {
+                return "Life insurance provides financial security for your loved ones. We offer term life, whole life, and universal life policies. How can I assist you with life insurance today?";
+            } else {
+                return "Thank you for your message. As your insurance assistant, I'm here to help with quotes, policy information, claims, and any insurance-related questions. How can I assist you further?";
+            }
+        }
+
+        function getQuickReplies(botMessage) {
+            if (botMessage.includes('quote')) {
+                return `
+                    <div class="quick-reply" onclick="selectQuickReply(this)">Auto insurance quote</div>
+                    <div class="quick-reply" onclick="selectQuickReply(this)">Home insurance quote</div>
+                    <div class="quick-reply" onclick="selectQuickReply(this)">Health insurance quote</div>
+                `;
+            } else if (botMessage.includes('health')) {
+                return `
+                    <div class="quick-reply" onclick="selectQuickReply(this)">Individual plan</div>
+                    <div class="quick-reply" onclick="selectQuickReply(this)">Family plan</div>
+                    <div class="quick-reply" onclick="selectQuickReply(this)">Compare plans</div>
+                `;
+            } else if (botMessage.includes('auto')) {
+                return `
+                    <div class="quick-reply" onclick="selectQuickReply(this)">New vehicle</div>
+                    <div class="quick-reply" onclick="selectQuickReply(this)">Existing policy</div>
+                    <div class="quick-reply" onclick="selectQuickReply(this)">Get quote</div>
+                `;
+            } else if (botMessage.includes('policy')) {
+                return `
+                    <div class="quick-reply" onclick="selectQuickReply(this)">Policy details</div>
+                    <div class="quick-reply" onclick="selectQuickReply(this)">Update policy</div>
+                    <div class="quick-reply" onclick="selectQuickReply(this)">Renew policy</div>
+                `;
+            }
+            return null;
+        }
+
+        function getSuggestionCards(botMessage) {
+            if (botMessage.includes('health') || botMessage.includes('quote')) {
+                return `
+                    <div class="suggestion-card" onclick="selectSuggestion(this)">
+                        <i class="fas fa-file-medical"></i>
+                        <h4>Health Plans</h4>
+                        <p>Compare different health insurance plans and benefits</p>
+                    </div>
+                    <div class="suggestion-card" onclick="selectSuggestion(this)">
+                        <i class="fas fa-user-md"></i>
+                        <h4>Find Doctors</h4>
+                        <p>Search for doctors in your network</p>
+                    </div>
+                    <div class="suggestion-card" onclick="selectSuggestion(this)">
+                        <i class="fas fa-pills"></i>
+                        <h4>Pharmacy</h4>
+                        <p>Check drug coverage and pharmacy locations</p>
+                    </div>
+                `;
+            }
+            return null;
+        }
+    </script>
+</body>
+</html>
