@@ -126,12 +126,39 @@ def api_query(request):
         if intent == "documents_needed":
             # Context-aware response
             last_intent = request.session.get('last_intent')
-            if last_intent in ['what_is_insurance', 'life_insurance_benefits', 'renew_policy', 'policy_suggestion', 'apply_for_insurance']:
-                # Direct response for insurance documents
-                if lang == "hi":
-                    return JsonResponse({"type": "faq", "text": "बीमा के लिए आवश्यक दस्तावेजों में पहचान प्रमाण (पैन कार्ड, आधार कार्ड), पता प्रमाण, आय प्रमाण, और मेडिकल रिपोर्ट (स्वास्थ्य बीमा के लिए) शामिल हैं। कृपया विशिष्ट बीमा प्रकार बताएं अधिक जानकारी के लिए।"})
+            if last_intent in ['what_is_insurance', 'life_insurance_benefits', 'renew_policy', 'policy_suggestion', 'apply_for_insurance', 'auto_insurance', 'home_insurance', 'life_insurance', 'travel_insurance', 'business_insurance']:
+                # Context-aware document response based on insurance type
+                if last_intent == 'auto_insurance':
+                    if lang == "hi":
+                        return JsonResponse({"type": "faq", "text": "ऑटो बीमा के लिए आवश्यक दस्तावेज: 1) वाहन का रजिस्ट्रेशन सर्टिफिकेट (RC) 2) वैध ड्राइविंग लाइसेंस 3) पहचान प्रमाण (आधार/पैन) 4) पता प्रमाण 5) पिछली पॉलिसी (रिन्यूअल के लिए) 6) वाहन की फोटो"})
+                    else:
+                        return JsonResponse({"type": "faq", "text": "Documents needed for auto insurance: 1) Vehicle Registration Certificate (RC) 2) Valid Driving License 3) ID proof (Aadhaar/PAN) 4) Address proof 5) Previous policy (for renewal) 6) Vehicle photographs"})
+                elif last_intent == 'home_insurance':
+                    if lang == "hi":
+                        return JsonResponse({"type": "faq", "text": "घर बीमा के लिए आवश्यक दस्तावेज: 1) घर के कागजात (रजिस्ट्री) 2) पहचान प्रमाण 3) पता प्रमाण 4) घर की फोटो 5) निर्माण अनुमति (यदि लागू) 6) पिछली पॉलिसी दस्तावेज"})
+                    else:
+                        return JsonResponse({"type": "faq", "text": "Documents needed for home insurance: 1) Property documents (registry) 2) ID proof 3) Address proof 4) House photographs 5) Construction permit (if applicable) 6) Previous policy documents"})
+                elif last_intent == 'life_insurance':
+                    if lang == "hi":
+                        return JsonResponse({"type": "faq", "text": "जीवन बीमा के लिए आवश्यक दस्तावेज: 1) पहचान प्रमाण (आधार/पैन/पासपोर्ट) 2) पता प्रमाण 3) आय प्रमाण (सैलरी स्लिप/ITR) 4) मेडिकल रिपोर्ट 5) पासपोर्ट साइज फोटो 6) नामांकित व्यक्ति का विवरण"})
+                    else:
+                        return JsonResponse({"type": "faq", "text": "Documents needed for life insurance: 1) ID proof (Aadhaar/PAN/Passport) 2) Address proof 3) Income proof (salary slip/ITR) 4) Medical reports 5) Passport size photos 6) Nominee details"})
+                elif last_intent == 'business_insurance':
+                    if lang == "hi":
+                        return JsonResponse({"type": "faq", "text": "व्यापार बीमा के लिए आवश्यक दस्तावेज: 1) व्यापार रजिस्ट्रेशन सर्टिफिकेट 2) GST रजिस्ट्रेशन 3) पहचान प्रमाण (पैन/आधार) 4) पता प्रमाण 5) व्यापार की फाइनेंशियल रिपोर्ट 6) पिछली पॉलिसी (रिन्यूअल के लिए)"})
+                    else:
+                        return JsonResponse({"type": "faq", "text": "Documents needed for business insurance: 1) Business Registration Certificate 2) GST Registration 3) ID proof (PAN/Aadhaar) 4) Address proof 5) Business financial reports 6) Previous policy (for renewal)"})
+                elif last_intent == 'travel_insurance':
+                    if lang == "hi":
+                        return JsonResponse({"type": "faq", "text": "यात्रा बीमा के लिए आवश्यक दस्तावेज: 1) पासपोर्ट 2) वीजा (यदि आवश्यक) 3) पहचान प्रमाण 4) यात्रा कार्यक्रम 5) स्वास्थ्य घोषणा पत्र 6) पासपोर्ट साइज फोटो"})
+                    else:
+                        return JsonResponse({"type": "faq", "text": "Documents needed for travel insurance: 1) Passport 2) Visa (if required) 3) ID proof 4) Travel itinerary 5) Health declaration form 6) Passport size photos"})
                 else:
-                    return JsonResponse({"type": "faq", "text": "Documents needed for insurance include ID proof (PAN card, Aadhaar), address proof, income proof, and medical reports (for health insurance). Please specify the insurance type for more details."})
+                    # General insurance documents
+                    if lang == "hi":
+                        return JsonResponse({"type": "faq", "text": "बीमा के लिए आवश्यक दस्तावेजों में पहचान प्रमाण (पैन कार्ड, आधार कार्ड), पता प्रमाण, आय प्रमाण, और मेडिकल रिपोर्ट (स्वास्थ्य बीमा के लिए) शामिल हैं। कृपया विशिष्ट बीमा प्रकार बताएं अधिक जानकारी के लिए।"})
+                    else:
+                        return JsonResponse({"type": "faq", "text": "Documents needed for insurance include ID proof (PAN card, Aadhaar), address proof, income proof, and medical reports (for health insurance). Please specify the insurance type for more details."})
             else:
                 faqs = search_faqs("What documents are required for insurance?", lang=lang)
                 if faqs:
@@ -159,6 +186,87 @@ def api_query(request):
                     return JsonResponse({"type": "faq", "text": "स्वास्थ्य बीमा चिकित्सा व्ययों को कवर करता है।"})
                 else:
                     return JsonResponse({"type": "faq", "text": "Health insurance covers medical expenses."})
+
+        # Handle specific insurance type intents - Use dataset responses
+        if intent == "auto_insurance":
+            is_detailed = request.session.get('is_detailed', False)
+            if is_detailed:
+                if lang == "hi":
+                    detailed_text = ("ऑटो बीमा आपके वाहन की सुरक्षा करता है। मुख्य कवरेज: 1) थर्ड-पार्टी लायबिलिटी - दूसरों को नुकसान पहुंचाने पर। 2) कोलिजन कवरेज - आपकी गलती से दुर्घटना होने पर। 3) कंप्रीहेंसिव कवरेज - चोरी, आग, प्राकृतिक आपदाओं से। 4) पर्सनल एक्सीडेंट कवर - आपकी चोट के लिए। 5) विभिन्न ऐड-ऑन जैसे ज़ीरो डेप्रिसिएशन, रोडसाइड असिस्टेंस।")
+                else:
+                    detailed_text = ("Auto insurance protects your vehicle with key coverages: 1) Third-Party Liability - For damage to others. 2) Collision Coverage - For accidents where you're at fault. 3) Comprehensive Coverage - For theft, fire, natural disasters. 4) Personal Accident Cover - For your injuries. 5) Various add-ons like Zero Depreciation, Roadside Assistance.")
+                return JsonResponse({"type": "faq", "text": detailed_text})
+            else:
+                faqs = search_faqs("auto insurance", lang=lang, category="auto_insurance")
+                if faqs:
+                    return JsonResponse({"type": "faq", "text": faqs[0]["answer"], "question": faqs[0]["question"]})
+                else:
+                    faqs = search_faqs("What is car insurance?", lang=lang)
+                    if faqs:
+                        return JsonResponse({"type": "faq", "text": faqs[0]["answer"], "question": faqs[0]["question"]})
+                    else:
+                        return JsonResponse({"type": "escalate", "text": "Auto insurance related query. Please contact our support team for detailed information."})
+
+        if intent == "home_insurance":
+            is_detailed = request.session.get('is_detailed', False)
+            if is_detailed:
+                if lang == "hi":
+                    detailed_text = ("घर बीमा आपके घर की सुरक्षा करता है। मुख्य कवरेज: 1) घर की संरचना - आग, भूकंप, बाढ़ से। 2) व्यक्तिगत सामान - चोरी, नुकसान से। 3) लायबिलिटी कवरेज - मेहमानों की चोट के लिए। 4) अतिरिक्त रहने का खर्च - घर रहने लायक न होने पर। 5) विभिन्न ऐड-ऑन जैसे आभूषण कवरेज, इलेक्ट्रॉनिक्स प्रोटेक्शन।")
+                else:
+                    detailed_text = ("Home insurance protects your house with key coverages: 1) Dwelling Coverage - For structure damage from fire, earthquake, flood. 2) Personal Property - For theft or damage to belongings. 3) Liability Coverage - For guest injuries. 4) Additional Living Expenses - If home becomes uninhabitable. 5) Various add-ons like jewelry coverage, electronics protection.")
+                return JsonResponse({"type": "faq", "text": detailed_text})
+            else:
+                faqs = search_faqs("home insurance", lang=lang, category="home_insurance")
+                if faqs:
+                    return JsonResponse({"type": "faq", "text": faqs[0]["answer"], "question": faqs[0]["question"]})
+                else:
+                    faqs = search_faqs("What is home insurance?", lang=lang)
+                    if faqs:
+                        return JsonResponse({"type": "faq", "text": faqs[0]["answer"], "question": faqs[0]["question"]})
+                    else:
+                        return JsonResponse({"type": "escalate", "text": "Home insurance related query. Please contact our support team for detailed information."})
+
+        if intent == "life_insurance":
+            is_detailed = request.session.get('is_detailed', False)
+            if is_detailed:
+                # Provide detailed response for life insurance
+                if lang == "hi":
+                    detailed_text = ("जीवन बीमा कई प्रकार के लाभ प्रदान करता है: 1) परिवार को वित्तीय सुरक्षा - बीमाधारक की मृत्यु के बाद परिवार को एकमुश्त राशि मिलती है जो टैक्स-फ्री होती है। 2) टैक्स लाभ - प्रीमियम पर टैक्स छूट मिलती है। 3) ऋण सुरक्षा - पॉलिसी को गिरवी रखकर ऋण लिया जा सकता है। 4) बचत - कुछ पॉलिसी में कैश वैल्यू जमा होती है। 5) व्यापक कवरेज - दुर्घटना या बीमारी से मृत्यु पर भी लाभ मिलता है। 6) विभिन्न प्रकार - टर्म लाइफ, होल लाइफ, यूनिवर्सल लाइफ आदि।")
+                else:
+                    detailed_text = ("Life insurance provides several benefits: 1) Financial security for family - Family receives a lump sum after the insured's death which is tax-free. 2) Tax benefits - Tax deductions on premiums. 3) Loan security - Policy can be used as collateral for loans. 4) Savings - Some policies accumulate cash value. 5) Comprehensive coverage - Benefits even in case of accidental or illness-related death. 6) Various types - Term life, whole life, universal life, etc.")
+                return JsonResponse({"type": "faq", "text": detailed_text})
+            else:
+                faqs = search_faqs("life insurance", lang=lang, category="life_insurance")
+                if faqs:
+                    return JsonResponse({"type": "faq", "text": faqs[0]["answer"], "question": faqs[0]["question"]})
+                else:
+                    faqs = search_faqs("What is life insurance?", lang=lang)
+                    if faqs:
+                        return JsonResponse({"type": "faq", "text": faqs[0]["answer"], "question": faqs[0]["question"]})
+                    else:
+                        return JsonResponse({"type": "escalate", "text": "Life insurance related query. Please contact our support team for detailed information."})
+
+        if intent == "travel_insurance":
+            faqs = search_faqs("travel insurance", lang=lang, category="travel_insurance")
+            if faqs:
+                return JsonResponse({"type": "faq", "text": faqs[0]["answer"], "question": faqs[0]["question"]})
+            else:
+                faqs = search_faqs("What is travel insurance?", lang=lang)
+                if faqs:
+                    return JsonResponse({"type": "faq", "text": faqs[0]["answer"], "question": faqs[0]["question"]})
+                else:
+                    return JsonResponse({"type": "escalate", "text": "Travel insurance related query. Please contact our support team for detailed information."})
+
+        if intent == "business_insurance":
+            faqs = search_faqs("business insurance", lang=lang, category="business_insurance")
+            if faqs:
+                return JsonResponse({"type": "faq", "text": faqs[0]["answer"], "question": faqs[0]["question"]})
+            else:
+                faqs = search_faqs("What is business insurance?", lang=lang)
+                if faqs:
+                    return JsonResponse({"type": "faq", "text": faqs[0]["answer"], "question": faqs[0]["question"]})
+                else:
+                    return JsonResponse({"type": "escalate", "text": "Business insurance related query. Please contact our support team for detailed information."})
         if intent == "health_insurance_family":
             if lang == "hi":
                 return JsonResponse({"type": "faq", "text": "परिवार स्वास्थ्य बीमा के लिए, हम परिवार योजनाएं प्रदान करते हैं जो पति-पत्नी और बच्चों को कवर करती हैं। कृपया परिवार के सदस्यों की संख्या और आयु बताएं।"})
@@ -289,7 +397,7 @@ def api_query(request):
         if intent == "document":
             # Make it context-aware
             last_intent = request.session.get('last_intent')
-            search_query = "documents needed for insurance" if last_intent in ['what_is_insurance', 'life_insurance_benefits', 'renew_policy', 'policy_suggestion', 'apply_for_insurance'] else "documents needed"
+            search_query = "documents needed for insurance" if last_intent in ['what_is_insurance', 'life_insurance_benefits', 'renew_policy', 'policy_suggestion', 'apply_for_insurance', 'auto_insurance', 'home_insurance', 'life_insurance', 'travel_insurance', 'business_insurance'] else "documents needed"
             faqs = search_faqs(search_query, lang=lang, category=category)
             if faqs:
                 return JsonResponse({"type": "faq", "text": faqs[0]["answer"], "question": faqs[0]["question"]})
@@ -326,7 +434,7 @@ def api_query(request):
                 search_query = text
 
                 # If last intent was insurance-related and current query mentions "it" or "document", make it more specific
-                if last_intent in ['what_is_insurance', 'life_insurance_benefits', 'renew_policy', 'policy_suggestion', 'apply_for_insurance'] and ('it' in text.lower() or 'document' in text.lower() or 'documents' in text.lower()):
+                if last_intent in ['what_is_insurance', 'life_insurance_benefits', 'renew_policy', 'policy_suggestion', 'apply_for_insurance', 'auto_insurance', 'home_insurance', 'life_insurance', 'travel_insurance', 'business_insurance'] and ('it' in text.lower() or 'document' in text.lower() or 'documents' in text.lower()):
                     if 'document' in text.lower() or 'documents' in text.lower():
                         search_query = "documents needed for insurance"
                     else:

@@ -172,12 +172,39 @@ training_data = [
     ("I want to renew my policy", "renew_policy"),
     ("Mujhe apni policy renew karni hai", "renew_policy"),
     ("What documents do I need?", "documents_needed"),
+    ("document kya lagenge", "documents_needed"),
+    ("kya lagenge", "documents_needed"),
+    ("kya chahiye", "documents_needed"),
+    ("kitne documents lagenge", "documents_needed"),
     ("Suggest me a good policy", "policy_suggestion"),
     ("How are you?", "small_talk"),
     ("Kaise ho?", "small_talk"),
     ("how to file insurance", "how_to_apply"),
     ("how to file the insurance", "how_to_apply"),
     ("insurance file kaise kare", "how_to_apply"),
+    # Insurance type specific queries
+    ("I'm interested in auto insurance", "auto_insurance"),
+    ("I'm interested in car insurance", "auto_insurance"),
+    ("I want auto insurance", "auto_insurance"),
+    ("Tell me about auto insurance", "auto_insurance"),
+    ("I'm interested in home insurance", "home_insurance"),
+    ("I'm interested in house insurance", "home_insurance"),
+    ("I want home insurance", "home_insurance"),
+    ("Tell me about home insurance", "home_insurance"),
+    ("I'm interested in life insurance", "life_insurance"),
+    ("I want life insurance", "life_insurance"),
+    ("Tell me about life insurance", "life_insurance"),
+    ("I'm interested in travel insurance", "travel_insurance"),
+    ("I want travel insurance", "travel_insurance"),
+    ("Tell me about travel insurance", "travel_insurance"),
+    ("I'm interested in business insurance", "business_insurance"),
+    ("I want business insurance", "business_insurance"),
+    ("Tell me about business insurance", "business_insurance"),
+    ("Auto Insurance", "auto_insurance"),
+    ("Home Insurance", "home_insurance"),
+    ("Life Insurance", "life_insurance"),
+    ("Travel Insurance", "travel_insurance"),
+    ("Business Insurance", "business_insurance"),
     ("Default", "faq"),  # Fallback
 ]
 
@@ -410,30 +437,55 @@ def detect_intent_and_entities(text):
     if "for my parents" in text_lower:
         return {"intent": "parents_coverage", "claim_id": None, "lang": lang}
 
-    # 7. Insurance type selections
-    if "interested in health insurance" in text_lower:
-        return {"intent": "health_insurance", "claim_id": None, "lang": lang}
-    if "interested in auto insurance" in text_lower:
-        return {"intent": "auto_insurance", "claim_id": None, "lang": lang}
-    if "interested in home insurance" in text_lower:
-        return {"intent": "home_insurance", "claim_id": None, "lang": lang}
-    if "interested in life insurance" in text_lower:
-        return {"intent": "life_insurance", "claim_id": None, "lang": lang}
-    if "interested in travel insurance" in text_lower:
-        return {"intent": "travel_insurance", "claim_id": None, "lang": lang}
-    if "interested in business insurance" in text_lower:
-        return {"intent": "business_insurance", "claim_id": None, "lang": lang}
+    # 7. Insurance type selections - made more flexible and case-insensitive
+    insurance_keywords = {
+        'health': ['health insurance', 'medical insurance', 'स्वास्थ्य बीमा'],
+        'auto': ['auto insurance', 'car insurance', 'vehicle insurance', 'ऑटो बीमा', 'कार बीमा'],
+        'home': ['home insurance', 'house insurance', 'property insurance', 'घर बीमा', 'मकान बीमा'],
+        'life': ['life insurance', 'जीवन बीमा'],
+        'travel': ['travel insurance', 'trip insurance', 'यात्रा बीमा'],
+        'business': ['business insurance', 'commercial insurance', 'व्यापार बीमा']
+    }
+
+    for ins_type, keywords in insurance_keywords.items():
+        for keyword in keywords:
+            if keyword in text_lower:
+                intent_map = {
+                    'health': 'health_insurance',
+                    'auto': 'auto_insurance',
+                    'home': 'home_insurance',
+                    'life': 'life_insurance',
+                    'travel': 'travel_insurance',
+                    'business': 'business_insurance'
+                }
+                return {"intent": intent_map[ins_type], "claim_id": None, "lang": lang}
 
     # 8. Specific plan type patterns (before existing health insurance rules)
     if "family plan" in text_lower and not ("health_insurance_family" in text_lower):
         return {"intent": "family_plan", "claim_id": None, "lang": lang}
 
-    # 2. Insurance category detection
+    # 2. Renewal keywords
+    if any(word in text_lower for word in ["renew", "renewal", "रिन्यू", "नवीनीकरण"]):
+        return {"intent": "renew_policy", "claim_id": None, "lang": lang}
+
+    # 3. Document keywords (expanded for Hindi) - MOVED UP for priority
+    document_keywords = [
+        "document", "documents", "papers", "paper",
+        "कागजात", "दस्तावेज", "कागज", "डॉक्यूमेंट",
+        "kya lagenge", "kya chahiye", "kya documents", "kya papers",
+        "क्या लगेंगे", "क्या चाहिए", "क्या दस्तावेज", "क्या कागजात",
+        "kitne documents", "kitne papers", "कितने दस्तावेज", "कितने कागजात",
+        "required documents", "जरूरी दस्तावेज", "आवश्यक दस्तावेज"
+    ]
+    if any(keyword in text_lower for keyword in document_keywords):
+        return {"intent": "documents_needed", "claim_id": None, "lang": lang}
+
+    # 4. Insurance category detection (only if not document-related)
     auto_keywords = ['auto', 'car', 'vehicle', 'driving', 'accident', 'collision', 'comprehensive', 'liability', 'auto insurance', 'car insurance', 'vehicle insurance']
     home_keywords = ['home', 'house', 'property', 'dwelling', 'homeowner', 'home insurance', 'house insurance', 'property insurance']
     life_keywords = ['life', 'life insurance', 'term life', 'whole life', 'universal life', 'permanent life']
     travel_keywords = ['travel', 'trip', 'vacation', 'travel insurance', 'trip insurance', 'journey']
-    business_keywords = ['business', 'commercial', 'company', 'corporate', 'enterprise', 'business insurance', 'commercial insurance', 'liability insurance', 'workers compensation', 'professional liability']
+    business_keywords = ['business', 'commercial', 'company', 'corporate', 'enterprise', 'business insurance', 'commercial insurance', 'व्यापार बीमा']
 
     if any(word in text_lower for word in auto_keywords):
         return {"intent": "faq", "category": "auto_insurance", "lang": lang}
@@ -446,15 +498,7 @@ def detect_intent_and_entities(text):
     elif any(word in text_lower for word in business_keywords):
         return {"intent": "faq", "category": "business_insurance", "lang": lang}
 
-    # 2. Renewal keywords
-    if any(word in text_lower for word in ["renew", "renewal", "रिन्यू", "नवीनीकरण"]):
-        return {"intent": "renew_policy", "claim_id": None, "lang": lang}
-
-    # 3. Document keywords
-    if any(word in text_lower for word in ["document", "papers", "कागजात", "दस्तावेज"]):
-        return {"intent": "documents_needed", "claim_id": None, "lang": lang}
-
-    # 4. Policy customization
+    # 5. Policy customization
     if any(word in text_lower for word in ["suggest", "recommend", "premium", "rate", "सुझाव", "सिफारिश"]):
         return {"intent": "policy_suggestion", "claim_id": None, "lang": lang}
 
