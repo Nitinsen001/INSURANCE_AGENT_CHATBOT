@@ -49,6 +49,85 @@ training_data = [
     ("Mujhe insurance lena hai", "apply_for_insurance"),
     ("Check my claim status", "ask_claim_status"),
     ("Mera claim status batao", "ask_claim_status"),
+    ("Check my claim", "ask_claim_status"),
+    ("Mera claim check karo", "ask_claim_status"),
+    ("Check claim", "ask_claim_status"),
+    ("Claim check", "ask_claim_status"),
+    # Premium Calculator
+    ("Premium Calculator", "premium_calculator"),
+    ("premium calculator", "premium_calculator"),
+    ("calculate premium", "premium_calculator"),
+    ("Tell me more about Premium Calculator", "premium_calculator"),
+    # Policy Documents
+    ("Policy Documents", "policy_documents"),
+    ("policy documents", "policy_documents"),
+    ("access documents", "policy_documents"),
+    ("manage documents", "policy_documents"),
+    ("Tell me more about Policy Documents", "policy_documents"),
+    # 24/7 Support
+    ("24/7 Support", "support_24_7"),
+    ("24/7 support", "support_24_7"),
+    ("customer support", "support_24_7"),
+    ("contact support", "support_24_7"),
+    ("Tell me more about 24/7 Support", "support_24_7"),
+    # Health Plans
+    ("Health Plans", "health_plans"),
+    ("health plans", "health_plans"),
+    ("compare health plans", "health_plans"),
+    ("health insurance plans", "health_plans"),
+    ("Tell me more about Health Plans", "health_plans"),
+    # Find Doctors
+    ("Find Doctors", "find_doctors"),
+    ("find doctors", "find_doctors"),
+    ("doctor search", "find_doctors"),
+    ("search doctors", "find_doctors"),
+    ("Tell me more about Find Doctors", "find_doctors"),
+    # Pharmacy
+    ("Pharmacy", "pharmacy"),
+    ("pharmacy", "pharmacy"),
+    ("drug coverage", "pharmacy"),
+    ("pharmacy locations", "pharmacy"),
+    ("Tell me more about Pharmacy", "pharmacy"),
+    # Quote related
+    ("Get a quote", "get_quote"),
+    ("get a quote", "get_quote"),
+    ("quote request", "get_quote"),
+    ("insurance quote", "get_quote"),
+    ("Auto insurance quote", "get_quote"),
+    ("Home insurance quote", "get_quote"),
+    ("Health insurance quote", "get_quote"),
+    # Policy Information
+    ("Policy information", "policy_information"),
+    ("policy information", "policy_information"),
+    ("policy info", "policy_information"),
+    ("my policy", "policy_information"),
+    ("Policy details", "policy_details"),
+    ("policy details", "policy_details"),
+    ("Update policy", "update_policy"),
+    ("update policy", "update_policy"),
+    ("Renew policy", "renew_policy"),
+    ("renew policy", "renew_policy"),
+    # Coverage Options
+    ("Coverage options", "coverage_options"),
+    ("coverage options", "coverage_options"),
+    ("coverage info", "coverage_options"),
+    ("what coverage", "coverage_options"),
+    # Claims Assistance
+    ("Claims assistance", "claims_assistance"),
+    ("claims assistance", "claims_assistance"),
+    ("help with claim", "claims_assistance"),
+    ("claim help", "claims_assistance"),
+    # Plan Types
+    ("Individual plan", "individual_plan"),
+    ("individual plan", "individual_plan"),
+    ("Family plan", "family_plan"),
+    ("family plan", "family_plan"),
+    ("Compare plans", "compare_plans"),
+    ("compare plans", "compare_plans"),
+    # Family Size Options
+    ("2 adults, 2 children", "family_size"),
+    ("Only for myself", "individual_only"),
+    ("For my parents", "parents_coverage"),
     ("Claim ID 12345 status", "check_claim_status"),
     ("Dawa ID 67890 ka status", "check_claim_status"),
     ("Hi", "greeting"),
@@ -305,6 +384,49 @@ def detect_intent_and_entities(text):
     bare_id = re.search(r"\b(\d{4,})\b", text_lower)
     if bare_id and ("claim" in text_lower or "दावा" in text_lower or "status" in text_lower or "स्थिति" in text_lower):
         return {"intent": "check_claim_status", "claim_id": bare_id.group(1), "lang": lang}
+
+    # 2. Claim-related queries without ID (should ask for claim ID)
+    claim_keywords = ["check claim", "check my claim", "claim status", "my claim", "दावा", "मेरा दावा", "claim check"]
+    if any(keyword in text_lower for keyword in claim_keywords):
+        return {"intent": "ask_claim_status", "claim_id": None, "lang": lang}
+
+    # 3. Premium Calculator
+    if "premium calculator" in text_lower or "calculate premium" in text_lower:
+        return {"intent": "premium_calculator", "claim_id": None, "lang": lang}
+
+    # 4. Policy Documents
+    if "policy documents" in text_lower or "access documents" in text_lower or "manage documents" in text_lower:
+        return {"intent": "policy_documents", "claim_id": None, "lang": lang}
+
+    # 5. Policy Details (before more_details rule)
+    if "policy details" in text_lower:
+        return {"intent": "policy_details", "claim_id": None, "lang": lang}
+
+    # 6. Family Size specific patterns
+    if "2 adults" in text_lower and "2 children" in text_lower:
+        return {"intent": "family_size", "claim_id": None, "lang": lang}
+    if "only for myself" in text_lower:
+        return {"intent": "individual_only", "claim_id": None, "lang": lang}
+    if "for my parents" in text_lower:
+        return {"intent": "parents_coverage", "claim_id": None, "lang": lang}
+
+    # 7. Insurance type selections
+    if "interested in health insurance" in text_lower:
+        return {"intent": "health_insurance", "claim_id": None, "lang": lang}
+    if "interested in auto insurance" in text_lower:
+        return {"intent": "auto_insurance", "claim_id": None, "lang": lang}
+    if "interested in home insurance" in text_lower:
+        return {"intent": "home_insurance", "claim_id": None, "lang": lang}
+    if "interested in life insurance" in text_lower:
+        return {"intent": "life_insurance", "claim_id": None, "lang": lang}
+    if "interested in travel insurance" in text_lower:
+        return {"intent": "travel_insurance", "claim_id": None, "lang": lang}
+    if "interested in business insurance" in text_lower:
+        return {"intent": "business_insurance", "claim_id": None, "lang": lang}
+
+    # 8. Specific plan type patterns (before existing health insurance rules)
+    if "family plan" in text_lower and not ("health_insurance_family" in text_lower):
+        return {"intent": "family_plan", "claim_id": None, "lang": lang}
 
     # 2. Insurance category detection
     auto_keywords = ['auto', 'car', 'vehicle', 'driving', 'accident', 'collision', 'comprehensive', 'liability', 'auto insurance', 'car insurance', 'vehicle insurance']

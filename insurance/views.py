@@ -355,6 +355,95 @@ def api_query(request):
                         return JsonResponse({"type": "escalate", "text": "आपकी क्वेरी थोड़ी जटिल है। मैं इसे मानव एजेंट को फॉरवर्ड कर रहा हूं। यदि आप फॉलो-अप चाहते हैं तो संपर्क विवरण साझा करें।"})
                     else:
                         return JsonResponse({"type": "escalate", "text": "Your query is a bit complex. I am forwarding it to a human agent. Please share contact details if you want follow-up."})
+        # Premium Calculator
+        if intent == "premium_calculator":
+            if lang == "hi":
+                return JsonResponse({"type": "faq", "text": "हमारा प्रीमियम कैलकुलेटर आपको विभिन्न बीमा योजनाओं के लिए अनुमानित प्रीमियम की गणना करने में मदद करता है। कृपया अपनी आवश्यकताओं के बारे में बताएं जैसे आयु, कवरेज राशि, और बीमा प्रकार।"})
+            else:
+                return JsonResponse({"type": "faq", "text": "Our Premium Calculator helps you estimate premiums for different insurance plans. Please provide details like your age, coverage amount, and type of insurance you'd like to calculate."})
+
+        # Policy Documents
+        if intent == "policy_documents":
+            if lang == "hi":
+                return JsonResponse({"type": "faq", "text": "अपने पॉलिसी दस्तावेजों को एक्सेस करने के लिए, कृपया हमारी वेबसाइट पर लॉग इन करें या हमारे ग्राहक सेवा से संपर्क करें। हम आपको सभी आवश्यक दस्तावेज ईमेल या डाउनलोड के लिए उपलब्ध करा सकते हैं।"})
+            else:
+                return JsonResponse({"type": "faq", "text": "To access your policy documents, please log in to our website or contact our customer service. We can provide you with all necessary documents via email or download."})
+
+        # 24/7 Support
+        if intent == "support_24_7":
+            if lang == "hi":
+                return JsonResponse({"type": "faq", "text": "हमारी 24/7 ग्राहक सहायता टीम हमेशा आपकी मदद के लिए उपलब्ध है। आप हमें फोन, ईमेल, या लाइव चैट के माध्यम से कभी भी संपर्क कर सकते हैं। आपातकालीन स्थिति के लिए हमारे हॉटलाइन नंबर का उपयोग करें।"})
+            else:
+                return JsonResponse({"type": "faq", "text": "Our 24/7 customer support team is always available to help you. You can reach us by phone, email, or live chat anytime. For emergencies, use our hotline number."})
+
+        # Get Quote
+        if intent == "get_quote":
+            if lang == "hi":
+                return JsonResponse({"type": "faq", "text": "मैं आपको विभिन्न बीमा योजनाओं के लिए कोटेशन प्रदान कर सकता हूं। कृपया मुझे बताएं कि आप किस प्रकार के बीमा में रुचि रखते हैं - स्वास्थ्य, ऑटो, घर, या जीवन बीमा?"})
+            else:
+                return JsonResponse({"type": "faq", "text": "I can provide you with quotes for various insurance plans. Please let me know what type of insurance you're interested in - health, auto, home, or life insurance?"})
+
+        # Policy Information
+        if intent == "policy_information":
+            if lang == "hi":
+                return JsonResponse({"type": "faq", "text": "आपकी पॉलिसी जानकारी के लिए, कृपया अपनी पॉलिसी नंबर प्रदान करें। मैं आपको आपकी पॉलिसी की सभी डिटेल्स, कवरेज, प्रीमियम, और अन्य महत्वपूर्ण जानकारी प्रदान कर सकता हूं।"})
+            else:
+                return JsonResponse({"type": "faq", "text": "For your policy information, please provide your policy number. I can provide you with all details about your policy including coverage, premium, and other important information."})
+
+        # Claims Assistance
+        if intent == "claims_assistance":
+            if lang == "hi":
+                return JsonResponse({"type": "faq", "text": "मैं आपको दावा प्रक्रिया में मदद कर सकता हूं। कृपया अपनी पॉलिसी नंबर और घटना के बारे में डिटेल्स प्रदान करें। मैं आपको दावा फॉर्म, आवश्यक दस्तावेजों, और पूरी प्रक्रिया के बारे में गाइड करूंगा।"})
+            else:
+                return JsonResponse({"type": "faq", "text": "I can help you with the claims process. Please provide your policy number and details about the incident. I'll guide you through the claim form, required documents, and the entire process."})
+
+        # Coverage Options
+        if intent == "coverage_options":
+            if lang == "hi":
+                return JsonResponse({"type": "faq", "text": "हम विभिन्न कवरेज विकल्प प्रदान करते हैं। स्वास्थ्य बीमा में व्यक्तिगत, परिवार, और वरिष्ठ नागरिक योजनाएं शामिल हैं। ऑटो बीमा में दायित्व, टक्कर, और व्यापक कवरेज शामिल हैं। आपकी आवश्यकताओं के आधार पर मैं आपको सबसे अच्छा विकल्प सुझा सकता हूं।"})
+            else:
+                return JsonResponse({"type": "faq", "text": "We offer various coverage options. Health insurance includes individual, family, and senior citizen plans. Auto insurance includes liability, collision, and comprehensive coverage. I can suggest the best option based on your needs."})
+
+        # Individual Plan
+        if intent == "individual_plan":
+            if lang == "hi":
+                return JsonResponse({"type": "faq", "text": "व्यक्तिगत स्वास्थ्य बीमा योजनाएं केवल आपकी चिकित्सा आवश्यकताओं को कवर करती हैं। हम विभिन्न डिडक्टिबल और कवरेज स्तरों के साथ योजनाएं प्रदान करते हैं। अधिक जानकारी के लिए कृपया अपनी आयु और स्वास्थ्य स्थिति बताएं।"})
+            else:
+                return JsonResponse({"type": "faq", "text": "Individual health insurance plans cover only your medical needs. We offer plans with various deductibles and coverage levels. Please provide your age and health condition for more details."})
+
+        # Family Plan
+        if intent == "family_plan":
+            if lang == "hi":
+                return JsonResponse({"type": "faq", "text": "परिवार स्वास्थ्य बीमा योजनाएं पति-पत्नी और बच्चों को कवर करती हैं। हम व्यापक चिकित्सा कवरेज के साथ परिवार योजनाएं प्रदान करते हैं। कृपया परिवार के सदस्यों की संख्या और उनकी आयु बताएं।"})
+            else:
+                return JsonResponse({"type": "faq", "text": "Family health insurance plans cover spouses and children with comprehensive medical coverage. Please tell me how many family members and their ages."})
+
+        # Compare Plans
+        if intent == "compare_plans":
+            if lang == "hi":
+                return JsonResponse({"type": "faq", "text": "मैं आपको विभिन्न स्वास्थ्य बीमा योजनाओं की तुलना करने में मदद कर सकता हूं। कृपया अपनी आवश्यकताएं बताएं जैसे बजट, कवरेज आवश्यकताएं, और परिवार का आकार। मैं आपको सबसे अच्छी योजना चुनने में मदद करूंगा।"})
+            else:
+                return JsonResponse({"type": "faq", "text": "I can help you compare different health insurance plans. Please tell me your requirements like budget, coverage needs, and family size. I'll help you choose the best plan."})
+
+        # Family Size Options
+        if intent == "family_size":
+            if lang == "hi":
+                return JsonResponse({"type": "faq", "text": "2 वयस्कों और 2 बच्चों के लिए, हम विशेष परिवार योजनाएं प्रदान करते हैं जो सभी सदस्यों को कवर करती हैं। बच्चों के लिए कम प्रीमियम और व्यापक कवरेज उपलब्ध है। क्या आप विशिष्ट कवरेज आवश्यकताओं के बारे में बताना चाहेंगे?"})
+            else:
+                return JsonResponse({"type": "faq", "text": "For 2 adults and 2 children, we offer special family plans that cover all members. Lower premiums for children and comprehensive coverage are available. Would you like to specify any particular coverage needs?"})
+
+        if intent == "individual_only":
+            if lang == "hi":
+                return JsonResponse({"type": "faq", "text": "व्यक्तिगत कवरेज के लिए, हम आपकी उम्र, स्वास्थ्य स्थिति और बजट के आधार पर सबसे अच्छी योजना सुझा सकते हैं। हमारी योजनाओं में डॉक्टर विजिट, अस्पताल में भर्ती, और प्रिस्क्रिप्शन दवाओं का कवरेज शामिल है।"})
+            else:
+                return JsonResponse({"type": "faq", "text": "For individual coverage, we can suggest the best plan based on your age, health condition, and budget. Our plans include doctor visits, hospitalization, and prescription drug coverage."})
+
+        if intent == "parents_coverage":
+            if lang == "hi":
+                return JsonResponse({"type": "faq", "text": "माता-पिता के लिए स्वास्थ्य बीमा के लिए, हम विशेष योजनाएं प्रदान करते हैं जो बुजुर्गों की चिकित्सा आवश्यकताओं को कवर करती हैं। कृपया उनके आयु और स्वास्थ्य स्थिति के बारे में बताएं ताकि मैं सबसे अच्छी योजना सुझा सकूं।"})
+            else:
+                return JsonResponse({"type": "faq", "text": "For parents' health insurance, we offer special plans that cover seniors' medical needs. Please tell me about their ages and health conditions so I can suggest the best plan."})
+
         # default fallback
         if lang == "hi":
             return JsonResponse({"type": "escalate", "text": "माफ करें, मैं आपकी बात समझ नहीं पाया। कृपया फिर से कहें या दावा आईडी प्रदान करें।"})
