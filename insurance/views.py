@@ -201,7 +201,7 @@ def api_query(request):
                 if faqs:
                     return JsonResponse({"type": "faq", "text": faqs[0]["answer"], "question": faqs[0]["question"]})
                 else:
-                    faqs = search_faqs("What is car insurance?", lang=lang)
+                    faqs = search_faqs("What is car insurance?", lang=lang, category="auto_insurance")
                     if faqs:
                         return JsonResponse({"type": "faq", "text": faqs[0]["answer"], "question": faqs[0]["question"]})
                     else:
@@ -220,7 +220,7 @@ def api_query(request):
                 if faqs:
                     return JsonResponse({"type": "faq", "text": faqs[0]["answer"], "question": faqs[0]["question"]})
                 else:
-                    faqs = search_faqs("What is home insurance?", lang=lang)
+                    faqs = search_faqs("What is home insurance?", lang=lang, category="home_insurance")
                     if faqs:
                         return JsonResponse({"type": "faq", "text": faqs[0]["answer"], "question": faqs[0]["question"]})
                     else:
@@ -240,7 +240,7 @@ def api_query(request):
                 if faqs:
                     return JsonResponse({"type": "faq", "text": faqs[0]["answer"], "question": faqs[0]["question"]})
                 else:
-                    faqs = search_faqs("What is life insurance?", lang=lang)
+                    faqs = search_faqs("What is life insurance?", lang=lang, category="life_insurance")
                     if faqs:
                         return JsonResponse({"type": "faq", "text": faqs[0]["answer"], "question": faqs[0]["question"]})
                     else:
@@ -251,7 +251,7 @@ def api_query(request):
             if faqs:
                 return JsonResponse({"type": "faq", "text": faqs[0]["answer"], "question": faqs[0]["question"]})
             else:
-                faqs = search_faqs("What is travel insurance?", lang=lang)
+                faqs = search_faqs("What is travel insurance?", lang=lang, category="travel_insurance")
                 if faqs:
                     return JsonResponse({"type": "faq", "text": faqs[0]["answer"], "question": faqs[0]["question"]})
                 else:
@@ -262,7 +262,7 @@ def api_query(request):
             if faqs:
                 return JsonResponse({"type": "faq", "text": faqs[0]["answer"], "question": faqs[0]["question"]})
             else:
-                faqs = search_faqs("What is business insurance?", lang=lang)
+                faqs = search_faqs("What is business insurance?", lang=lang, category="business_insurance")
                 if faqs:
                     return JsonResponse({"type": "faq", "text": faqs[0]["answer"], "question": faqs[0]["question"]})
                 else:

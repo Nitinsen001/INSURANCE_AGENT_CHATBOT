@@ -533,37 +533,42 @@
         const chatMessages = document.getElementById('chatMessages');
         const userInput = document.getElementById('userInput');
 
+        let isRequestPending = false;
+
         function sendMessage() {
             const message = userInput.value.trim();
-            if (message === '') return;
+            if (message === '' || isRequestPending) return;
+            isRequestPending = true;
+            userInput.disabled = true;
 
-            // Add user message
             addMessage(message, 'user');
             userInput.value = '';
-
-            // Show typing indicator
             showTypingIndicator();
 
-            // Simulate bot response after a delay (using backend)
-            setTimeout(() => {
-                removeTypingIndicator();
-                // Use backend API instead of local function
-                fetch(`/api/query/?text=${encodeURIComponent(message)}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.text) {
-                            addMessage(data.text, 'bot');
-                        } else {
-                            addMessage('Sorry, I couldn\'t process your request.', 'bot');
-                        }
-                        // Scroll to bottom
-                        chatMessages.scrollTop = chatMessages.scrollHeight;
-                    })
-                    .catch(err => {
-                        addMessage('Connection error. Please try again.', 'bot');
-                        chatMessages.scrollTop = chatMessages.scrollHeight;
-                    });
-            }, 1500);
+            fetch(`/api/query/?text=${encodeURIComponent(message)}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Request failed with status ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (!data.text) {
+                        throw new Error('The server response did not include a message.');
+                    }
+                    addMessage(data.text, 'bot');
+                })
+                .catch(error => {
+                    console.error('Chat request failed:', error);
+                    addMessage('Sorry, I could not get a response. Please try again.', 'bot');
+                })
+                .finally(() => {
+                    removeTypingIndicator();
+                    isRequestPending = false;
+                    userInput.disabled = false;
+                    userInput.focus();
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                });
         }
 
         function addMessage(text, sender) {

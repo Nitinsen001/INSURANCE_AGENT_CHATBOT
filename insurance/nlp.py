@@ -1,6 +1,7 @@
 # Improved NLP utilities with ML-based intent classification using scikit-learn.
 
 import re
+from functools import lru_cache
 from .models import FAQ
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
@@ -222,6 +223,40 @@ insurance_data = training_data[:]  # Copy original
 for _ in range(10):  # Add 10 more copies
     training_data.extend(insurance_data)
 
+def _load_category_faqs(csv_filename, category):
+    import pandas as pd
+    from .models import FAQ
+
+    csv_path = os.path.join(os.path.dirname(__file__), csv_filename)
+    if not os.path.exists(csv_path):
+        return
+
+    dataframe = pd.read_csv(csv_path, encoding='utf-8-sig')
+    if not {'question', 'answer'}.issubset(dataframe.columns):
+        return
+
+    for _, row in dataframe.iterrows():
+        question = row['question']
+        answer = row['answer']
+        if not (pd.notna(question) and pd.notna(answer)):
+            continue
+
+        question = question.strip()
+        answer = answer.strip()
+        if not question or not answer:
+            continue
+
+        matching_faqs = FAQ.objects.filter(question=question)
+        if matching_faqs.exists():
+            matching_faqs.update(answer_en=answer, category=category)
+        else:
+            FAQ.objects.create(
+                question=question,
+                answer_en=answer,
+                category=category,
+            )
+
+
 def load_faqs():
     """Load FAQs from CSV"""
     kaggle_csv_path = os.path.join(os.path.dirname(__file__), 'kaggle_intents.csv')
@@ -259,101 +294,6 @@ def load_faqs():
             except Exception as e:
                 print(f"Error loading FAQs: {e}")
 
-        # Load auto_insurance.csv
-        auto_csv_path = os.path.join(os.path.dirname(__file__), 'auto_insurance.csv')
-        if os.path.exists(auto_csv_path):
-            df_auto = pd.read_csv(auto_csv_path, encoding='utf-8-sig')
-            if 'question' in df_auto.columns and 'answer' in df_auto.columns:
-                try:
-                    for index, row in df_auto.iterrows():
-                        question = row['question']
-                        answer = row['answer']
-                        if pd.notna(question) and pd.notna(answer) and question.strip() and answer.strip():
-                            if not FAQ.objects.filter(question=question.strip()).exists():
-                                FAQ.objects.create(
-                                    question=question.strip(),
-                                    answer_en=answer.strip(),
-                                    category='auto_insurance'
-                                )
-                except Exception as e:
-                    print(f"Error loading auto insurance FAQs: {e}")
-
-        # Load home_insurance.csv
-        home_csv_path = os.path.join(os.path.dirname(__file__), 'home_insurance.csv')
-        if os.path.exists(home_csv_path):
-            df_home = pd.read_csv(home_csv_path, encoding='utf-8-sig')
-            if 'question' in df_home.columns and 'answer' in df_home.columns:
-                try:
-                    for index, row in df_home.iterrows():
-                        question = row['question']
-                        answer = row['answer']
-                        if pd.notna(question) and pd.notna(answer) and question.strip() and answer.strip():
-                            if not FAQ.objects.filter(question=question.strip()).exists():
-                                FAQ.objects.create(
-                                    question=question.strip(),
-                                    answer_en=answer.strip(),
-                                    category='home_insurance'
-                                )
-                except Exception as e:
-                    print(f"Error loading home insurance FAQs: {e}")
-
-        # Load life_insurance.csv
-        life_csv_path = os.path.join(os.path.dirname(__file__), 'life_insurance.csv')
-        if os.path.exists(life_csv_path):
-            df_life = pd.read_csv(life_csv_path, encoding='utf-8-sig')
-            if 'question' in df_life.columns and 'answer' in df_life.columns:
-                try:
-                    for index, row in df_life.iterrows():
-                        question = row['question']
-                        answer = row['answer']
-                        if pd.notna(question) and pd.notna(answer) and question.strip() and answer.strip():
-                            if not FAQ.objects.filter(question=question.strip()).exists():
-                                FAQ.objects.create(
-                                    question=question.strip(),
-                                    answer_en=answer.strip(),
-                                    category='life_insurance'
-                                )
-                except Exception as e:
-                    print(f"Error loading life insurance FAQs: {e}")
-
-        # Load travel_insurance.csv
-        travel_csv_path = os.path.join(os.path.dirname(__file__), 'travel_insurance.csv')
-        if os.path.exists(travel_csv_path):
-            df_travel = pd.read_csv(travel_csv_path, encoding='utf-8-sig')
-            if 'question' in df_travel.columns and 'answer' in df_travel.columns:
-                try:
-                    for index, row in df_travel.iterrows():
-                        question = row['question']
-                        answer = row['answer']
-                        if pd.notna(question) and pd.notna(answer) and question.strip() and answer.strip():
-                            if not FAQ.objects.filter(question=question.strip()).exists():
-                                FAQ.objects.create(
-                                    question=question.strip(),
-                                    answer_en=answer.strip(),
-                                    category='travel_insurance'
-                                )
-                except Exception as e:
-                    print(f"Error loading travel insurance FAQs: {e}")
-
-        # Load business_insurance.csv
-        business_csv_path = os.path.join(os.path.dirname(__file__), 'business_insurance.csv')
-        if os.path.exists(business_csv_path):
-            df_business = pd.read_csv(business_csv_path, encoding='utf-8-sig')
-            if 'question' in df_business.columns and 'answer' in df_business.columns:
-                try:
-                    for index, row in df_business.iterrows():
-                        question = row['question']
-                        answer = row['answer']
-                        if pd.notna(question) and pd.notna(answer) and question.strip() and answer.strip():
-                            if not FAQ.objects.filter(question=question.strip()).exists():
-                                FAQ.objects.create(
-                                    question=question.strip(),
-                                    answer_en=answer.strip(),
-                                    category='business_insurance'
-                                )
-                except Exception as e:
-                    print(f"Error loading business insurance FAQs: {e}")
-
         elif 'patterns' in df.columns and 'tag' in df.columns:
             # Fallback to old format for intents
             kaggle_data = []
@@ -366,6 +306,15 @@ def load_faqs():
                 if pd.notna(pattern) and pattern.strip() and current_tag:
                     kaggle_data.append((pattern.strip(), current_tag))
             training_data.extend(kaggle_data)
+
+    for filename, category in (
+        ('auto_insurance.csv', 'auto_insurance'),
+        ('home_insurance.csv', 'home_insurance'),
+        ('life_insurance.csv', 'life_insurance'),
+        ('travel_insurance.csv', 'travel_insurance'),
+        ('business_insurance.csv', 'business_insurance'),
+    ):
+        _load_category_faqs(filename, category)
 
 # Load FAQs on import
 load_faqs()
@@ -540,77 +489,38 @@ def detect_intent_and_entities(text):
 
     return {"intent": intent, "claim_id": None, "lang": lang}
 
-# Enhanced FAQ search using semantic similarity with SentenceTransformer
+@lru_cache(maxsize=8)
+def _get_faq_tfidf(corpus):
+    vectorizer = TfidfVectorizer(ngram_range=(1, 2), stop_words='english')
+    matrix = vectorizer.fit_transform(corpus)
+    return vectorizer, matrix
+
+
 def search_faqs(query, limit=3, lang='en', category=None):
-    # Preprocess query
     query = preprocess_query(query)
+    if not query.strip():
+        return []
 
-    try:
-        from sentence_transformers import SentenceTransformer, util
-        import torch
-
-        if not query.strip():
-            return []
-
-        if category:
-            faqs = FAQ.objects.filter(category=category)
-        else:
-            faqs = FAQ.objects.filter(tags__icontains="insurance")
+    if category:
+        faqs = list(FAQ.objects.filter(category=category).order_by('pk'))
+    else:
+        faqs = list(FAQ.objects.filter(tags__icontains="insurance").order_by('pk'))
         if not faqs:
-            faqs = FAQ.objects.all()
-        if not faqs:
-            return []
+            faqs = list(FAQ.objects.all().order_by('pk'))
+    if not faqs:
+        return []
 
-        # Use semantic similarity
-        model = SentenceTransformer('all-MiniLM-L6-v2')
-        questions = [f.question for f in faqs]
-        faq_embeddings = model.encode(questions, convert_to_tensor=True)
-        query_embedding = model.encode(query, convert_to_tensor=True)
+    corpus = tuple(f"{faq.question} {faq.tags or ''}" for faq in faqs)
+    vectorizer, tfidf_matrix = _get_faq_tfidf(corpus)
+    query_vec = vectorizer.transform([query])
+    similarities = (query_vec @ tfidf_matrix.T).toarray().ravel()
 
-        similarities = [util.cos_sim(query_embedding, emb).item() for emb in faq_embeddings]
-
-        # Get top matches with threshold
-        matches = []
-        for idx, score in enumerate(similarities):
-            if score > 0.45:  # Threshold for semantic similarity
-                f = faqs[idx]
-                answer = f.answer_hi if lang == 'hi' else f.answer_en
-                matches.append({"question": f.question, "answer": answer, "score": score})
-
-        matches.sort(key=lambda x: x["score"], reverse=True)
-        return matches[:limit]
-
-    except ImportError:
-        # Fallback to TF-IDF if sentence-transformers not available
-        from sklearn.metrics.pairwise import cosine_similarity
-        from sklearn.feature_extraction.text import TfidfVectorizer
-
-        if not query.strip():
-            return []
-
-        if category:
-            faqs = FAQ.objects.filter(category=category)
-        else:
-            faqs = FAQ.objects.filter(tags__icontains="insurance")
-        if not faqs:
-            faqs = FAQ.objects.all()
-        if not faqs:
-            return []
-
-        questions = [f.question for f in faqs]
-        tags = [f.tags or "" for f in faqs]
-        combined_texts = [q + " " + t for q, t in zip(questions, tags)]
-
-        tfidf = TfidfVectorizer(ngram_range=(1, 2), stop_words='english')
-        tfidf_matrix = tfidf.fit_transform(combined_texts)
-        query_vec = tfidf.transform([query])
-        similarities = cosine_similarity(query_vec, tfidf_matrix).flatten()
-
-        matches = []
-        for idx, score in enumerate(similarities):
-            if score > 0.2:
-                f = faqs[idx]
-                answer = f.answer_hi if lang == 'hi' else f.answer_en
-                matches.append({"question": f.question, "answer": answer, "score": score})
-        matches.sort(key=lambda x: x["score"], reverse=True)
-        return matches[:limit]
+    matches = []
+    for faq, score in zip(faqs, similarities):
+        if score > 0.2:
+            answer = faq.answer_hi if lang == 'hi' else faq.answer_en
+            matches.append(
+                {"question": faq.question, "answer": answer, "score": float(score)}
+            )
+    matches.sort(key=lambda match: match["score"], reverse=True)
+    return matches[:limit]
