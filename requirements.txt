@@ -2,3 +2,4 @@ Django==5.2.6
 scikit-learn==1.7.2
 pandas==2.3.2
 whitenoise>=6.8,<7
+gunicorn
